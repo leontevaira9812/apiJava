@@ -1,8 +1,13 @@
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
+
+
 import java.util.HashMap;
 import java.util.Map;
+
+
 
 public class HelloWorldTest {
     @Test
@@ -68,5 +73,35 @@ public class HelloWorldTest {
                 System.out.println("Ваш пароль = " + data.get("password"));
             }
         }
+    }
+
+    @Test
+    public void testRestAssuredEx8() throws InterruptedException {
+        JsonPath responseCreate = RestAssured
+                .given()
+                .when()
+                .get("https://playground.learnqa.ru/ajax/api/longtime_job").jsonPath();
+        responseCreate.prettyPrint();
+        String token = responseCreate.get("token");
+        int seconds = responseCreate.get("seconds");
+
+        JsonPath responseBefore = RestAssured
+                .given()
+                .queryParam("token", token)
+                .when()
+                .get("https://playground.learnqa.ru/ajax/api/longtime_job").jsonPath();
+        responseBefore.prettyPrint();
+        assert responseBefore.get("status").equals("Job is NOT ready");
+        Thread.sleep(seconds*1000);
+
+        JsonPath responseAfter = RestAssured
+                .given()
+                .queryParam("token", token)
+                .when()
+                .get("https://playground.learnqa.ru/ajax/api/longtime_job").jsonPath();
+        responseAfter.prettyPrint();
+        assert responseAfter.get("status").equals("Job is ready");
+        assert responseAfter.get("result")!=null;
+
     }
 }
