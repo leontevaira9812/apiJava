@@ -193,5 +193,15 @@ public class HelloWorldTest {
         String text = "helloWorldText";
         assertTrue(text.length() > 15, "text is less than 15 symbols");
     }
+
+    @Test
+    public void ex11(){
+        Response response = RestAssured
+                .given()
+                .get("https://playground.learnqa.ru/api/homework_cookie").andReturn();
+        Map<String,String> cookies = response.getCookies();
+        String cookie_value = cookies.get("HomeWork");
+        assertEquals("hw_value",cookie_value, "cookie not equals");
+    }
 }
 
