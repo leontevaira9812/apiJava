@@ -1,3 +1,5 @@
+package tests;
+
 import groovyjarjarpicocli.CommandLine;
 import io.restassured.RestAssured;
 import io.restassured.http.Headers;
