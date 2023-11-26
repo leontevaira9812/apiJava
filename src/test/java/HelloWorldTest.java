@@ -1,7 +1,13 @@
 import io.restassured.RestAssured;
+import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 import java.util.HashMap;
@@ -92,7 +98,7 @@ public class HelloWorldTest {
                 .get("https://playground.learnqa.ru/ajax/api/longtime_job").jsonPath();
         responseBefore.prettyPrint();
         assert responseBefore.get("status").equals("Job is NOT ready");
-        Thread.sleep(seconds*1000);
+        Thread.sleep(seconds * 1000);
 
         JsonPath responseAfter = RestAssured
                 .given()
@@ -101,7 +107,85 @@ public class HelloWorldTest {
                 .get("https://playground.learnqa.ru/ajax/api/longtime_job").jsonPath();
         responseAfter.prettyPrint();
         assert responseAfter.get("status").equals("Job is ready");
-        assert responseAfter.get("result")!=null;
+        assert responseAfter.get("result") != null;
 
     }
+
+   @ParameterizedTest
+   @ValueSource(strings = {"", "John", "Pete"})
+    public void testHelloWithParameters(String name) {
+        Map<String, String> query = new HashMap<>();
+        if(name.length()>0){
+            query.put("name", name);
+        }
+       JsonPath response = RestAssured
+               .given()
+               .queryParams(query)
+               .get("https://playground.learnqa.ru/api/hello").jsonPath();
+        String answer = response.get("answer");
+        String expectedName = name.length()>0 ? name : "someone";
+        assertEquals("Hello, " + expectedName , answer, "The answer is not expected");
+    }
+@Test
+    public void testPositiveAuth(){
+        Map<String,String> authData = new HashMap<>();
+        authData.put("email", "vinkotov@example.com");
+        authData.put("password","1234");
+
+        Response responseLogin = RestAssured
+                .given()
+                .body(authData)
+                .post("https://playground.learnqa.ru/api/user/login")
+                .andReturn();
+        Map<String,String> cookies = responseLogin.getCookies();
+        Headers headers = responseLogin.getHeaders();
+        int userOnIdOnLogin = responseLogin.jsonPath().getInt("user_id");
+
+        assertEquals(200, responseLogin.getStatusCode(), "Status code is not 200");
+        assertTrue(cookies.containsKey("auth_sid"),"Response does not contains 'auth_sid");
+        assertTrue(headers.hasHeaderWithName("x-csrf-token"), "Response does not contains 'x-csrf-token'");
+        assertTrue(responseLogin.jsonPath().getInt("user_id")>0, "User id should be greater than 0");
+
+        JsonPath responseAuth = RestAssured
+                .given()
+                .header("x-csrf-token", responseLogin.getHeader("x-csrf-token"))
+                .cookie("auth_sid",responseLogin.getCookie("auth_sid"))
+                .get("https://playground.learnqa.ru/api/user/auth")
+                .jsonPath();
+        int userIdonAuth = responseAuth.getInt("user_id");
+        assertTrue(userIdonAuth > 0 , "Unexpected userId " + userIdonAuth);
+        assertEquals(userIdonAuth,userOnIdOnLogin, "UserId does not match");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"cookie","headers"})
+    public void testNegativeTest(String condition){
+        Map<String,String> authData = new HashMap<>();
+        authData.put("email", "vinkotov@example.com");
+        authData.put("password","1234");
+
+        Response responseLogin = RestAssured
+                .given()
+                .body(authData)
+                .post("https://playground.learnqa.ru/api/user/login")
+                .andReturn();
+        Map<String,String> cookies = responseLogin.getCookies();
+        Headers headers = responseLogin.getHeaders();
+
+        RequestSpecification spec = RestAssured.given();
+        spec.baseUri("https://playground.learnqa.ru/api/user/auth");
+
+        if(condition.equals("cookie")) {
+            spec.cookie("auth_sid", responseLogin.getCookie("auth_sid"));
+        }else if(condition.equals("headers")){
+            spec.cookie("x-csrf-token",responseLogin.getHeader("x-csrf-token"));
+        }else {
+            throw new IllegalArgumentException("Condition value is known :" +condition);
+        }
+        JsonPath responseAuth = spec.get().jsonPath();
+        assertEquals(0,responseAuth.getInt("user_id"), "user id should be greater 0");
+
+    }
+
 }
+
