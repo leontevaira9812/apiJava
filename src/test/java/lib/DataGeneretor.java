@@ -3,6 +3,7 @@ package lib;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class DataGeneretor {
     public static String generateNewEmail(){
@@ -22,7 +23,7 @@ public class DataGeneretor {
         Map<String,String> defaultValues = DataGeneretor.getRegistrationData();
         Map<String,String> userData = new HashMap<>();
 
-        String[] keys = {"username", "firstName", "lastName", "email"};
+        String[] keys = {"username", "firstName", "lastName", "email","password"};
         for (String key : keys){
             if(nonDefaultValues.containsKey(key)){
                 userData.put(key,nonDefaultValues.get(key));
@@ -31,5 +32,20 @@ public class DataGeneretor {
             }
         }
         return userData;
+    }
+
+    public static String getRandomString(String characters, Integer lengthString) {
+        Random r = new Random();
+        StringBuilder str = new StringBuilder();
+
+        for (int i = 0; i < lengthString; i++) {
+            str.append(characters.charAt(r.nextInt(characters.length())));
+        }
+
+        return str.toString();
+    }
+
+    public static String getRandomString(Integer lengthString) {
+        return getRandomString("abcdefghijklmnopqrstuvwxyz", lengthString);
     }
 }

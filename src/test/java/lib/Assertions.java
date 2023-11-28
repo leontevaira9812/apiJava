@@ -25,7 +25,7 @@ public class Assertions {
 
     }
 
-    public static void assertEmailEquals(Response Response,String expectedText){
+    public static void assertResponseEquals(Response Response, String expectedText){
        assertEquals(expectedText,Response.asString(),"Response text is not as expected");
     }
 
@@ -46,4 +46,5 @@ public class Assertions {
     public static void assertJsonHasNotField(Response Response, String unexpectedFieldName){
         Response.then().body("$",not(unexpectedFieldName));
     }
+
 }
