@@ -15,8 +15,8 @@ public class DataGeneretor {
         authData.put("email",generateNewEmail());
         authData.put("password","123");
         authData.put("username","user");
-        authData.put("firstName","fNam");
-        authData.put("lastName","lNam");
+        authData.put("firstName",DataGeneretor.getRandomString(7));
+        authData.put("lastName",DataGeneretor.getRandomString(8));
         return authData;
     }
     public static  Map<String,String> getRegistrationData(Map<String,String> nonDefaultValues){

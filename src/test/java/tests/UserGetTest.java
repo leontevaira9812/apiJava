@@ -43,6 +43,8 @@ public class UserGetTest extends BaseTestcase {
                 .cookie("auth_sid",cookie)
                 .get("https://playground.learnqa.ru/api/user/2").andReturn();
 
+        responseUserData.print();
+
         String [] expectedFields = {"username", "firstName", "lastName", "email"};
         Assertions.assertJsonHasFields(responseUserData,expectedFields);
     }
