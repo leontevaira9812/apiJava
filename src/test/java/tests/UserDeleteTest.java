@@ -1,18 +1,33 @@
 package tests;
 
+import io.qameta.allure.*;
 import io.restassured.response.Response;
 import lib.ApiCoreRequests;
 import lib.Assertions;
 import lib.BaseTestcase;
 import lib.DataGeneretor;
+import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import  io.qameta.allure.Story;
+import  io.qameta.allure.Owner;
+
 public class UserDeleteTest extends BaseTestcase {
     private final ApiCoreRequests apiCoreRequests = new ApiCoreRequests();
 
+    @Epic(value = "Функционал удаление")
+    @Feature(value = "Тесты на удаление пользователей")
+    @Story(value = "Негативный тест на удаление")
+    @Description(value = " Удаление игрока,которого нельзя удалить")
+    @Owner(value = "Irina")
+    @Severity(value = SeverityLevel.NORMAL)
     @Test
     public void negativeTest() {
         Map<String, String> authData = new HashMap<>();
@@ -29,6 +44,12 @@ public class UserDeleteTest extends BaseTestcase {
         Assertions.assertResponseEquals(responseDelete, "Please, do not delete test users with ID 1, 2, 3, 4 or 5.");
     }
 
+    @Epic(value = "Функционал удаление")
+    @Feature(value = "Тесты на удаление пользователей")
+    @Story(value = "Позитивный тест на удаление")
+    @Description(value = " Удаление игрока, будучи авторизованным этим игроком")
+    @Owner(value = "Irina")
+    @Severity(value = SeverityLevel.CRITICAL)
     @Test
     public void positiveTest() {
         //create
@@ -56,8 +77,14 @@ public class UserDeleteTest extends BaseTestcase {
         Assertions.assertResponseEquals(responseUserData, "User not found");
     }
 
+    @Epic(value = "Функционал удаление")
+    @Feature(value = "Тесты на удаление пользователей")
+    @Story(value = "Негативный тест на удаление другого игрока")
+    @Description(value = " Удаление игрока, будучи авторизованным другим игроком")
+    @Owner(value = "Irina")
+    @Severity(value = SeverityLevel.BLOCKER)
     @Test
-    public void negativeDeleteAnotherUser(){
+    public void negativeDeleteAnotherUser() {
         //create
         Map<String, String> userData = DataGeneretor.getRegistrationData();
         Response responseCreate = apiCoreRequests.makePostRequest("https://playground.learnqa.ru/api/user/", userData);
@@ -83,7 +110,7 @@ public class UserDeleteTest extends BaseTestcase {
         //get
         Response responseUserData = apiCoreRequests.makeGetRequest("https://playground.learnqa.ru/api/user/" + id);
 
-        Assertions.assertJsonByName(responseUserData,"username",userDataForDelete.get("username"));
+        Assertions.assertJsonByName(responseUserData, "username", userDataForDelete.get("username"));
     }
 }
 
